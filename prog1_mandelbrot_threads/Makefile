@@ -1,10 +1,11 @@
 
 CXX=g++ -m64
-CXXFLAGS=-I../common -Iobjs/ -O3 -std=c++11 -Wall -fPIC
+CXXFLAGS=-I../common -Iobjs/ -O3 -std=c++23 -Wall -fPIC
 
 APP_NAME=mandelbrot
 OBJDIR=objs
 COMMONDIR=../common
+CURRENTDIR=.
 
 PPM_CXX=$(COMMONDIR)/ppm.cpp
 PPM_OBJ=$(addprefix $(OBJDIR)/, $(subst $(COMMONDIR)/,, $(PPM_CXX:.cpp=.o)))
@@ -20,7 +21,7 @@ dirs:
 clean:
 		/bin/rm -rf $(OBJDIR) *.ppm *~ $(APP_NAME)
 
-OBJS=$(OBJDIR)/main.o $(OBJDIR)/mandelbrotSerial.o $(OBJDIR)/mandelbrotThread.o $(PPM_OBJ)
+OBJS=$(OBJDIR)/main.o $(OBJDIR)/mandelbrotSerial.o $(OBJDIR)/mandelbrotThread.o $(OBJDIR)/solution.o $(PPM_OBJ)
 
 $(APP_NAME): dirs $(OBJS)
 		$(CXX) $(CXXFLAGS) -o $@ $(OBJS) -lm -lpthread
@@ -31,5 +32,6 @@ $(OBJDIR)/%.o: %.cpp
 $(OBJDIR)/%.o: $(COMMONDIR)/%.cpp
 	$(CXX) $< $(CXXFLAGS) -c -o $@
 
-$(OBJDIR)/main.o: $(COMMONDIR)/CycleTimer.h
+$(OBJDIR)/main.o: $(COMMONDIR)/CycleTimer.h $(CURRENTDIR)/solution.hpp
+$(OBJDIR)/solution.o: $(COMMONDIR)/CycleTimer.h $(CURRENTDIR)/solution.hpp
 
