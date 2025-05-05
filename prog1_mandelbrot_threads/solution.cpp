@@ -16,19 +16,17 @@
 
 #define NUM_THREADS 2
 
-extern void mandelbrotSerial(float x0, float y0, float x1, float y1, int width,
-                             int height, int startRow, int numRows,
-                             int maxIterations, int output[]);
+extern void mandelbrotSerial(float x0, float y0, float x1, float y1, int width, int height,
+                             int startRow, int numRows, int maxIterations, int output[]);
 
-extern void mandelbrotThread(int numThreads, float x0, float y0, float x1,
-                             float y1, int width, int height, int maxIterations,
-                             int output[]);
+extern void mandelbrotThread(int numThreads, float x0, float y0, float x1, float y1, int width,
+                             int height, int maxIterations, int output[]);
 
-extern void writePPMImage(int* data, int width, int height,
-                          const char* filename, int maxIterations);
+extern void writePPMImage(int* data, int width, int height, const char* filename,
+                          int maxIterations);
 
-void scaleAndShift(float& x0, float& x1, float& y0, float& y1, float scale,
-                   float shiftX, float shiftY) {
+void scaleAndShift(float& x0, float& x1, float& y0, float& y1, float scale, float shiftX,
+                   float shiftY) {
   x0 *= scale;
   x1 *= scale;
   y0 *= scale;
@@ -53,8 +51,8 @@ bool verifyResult(int* gold, int* result, int width, int height) {
   for (i = 0; i < height; i++) {
     for (j = 0; j < width; j++) {
       if (gold[i * width + j] != result[i * width + j]) {
-        printf("Mismatch : [%d][%d], Expected : %d, Actual : %d\n", i, j,
-               gold[i * width + j], result[i * width + j]);
+        printf("Mismatch : [%d][%d], Expected : %d, Actual : %d\n", i, j, gold[i * width + j],
+               result[i * width + j]);
         return 0;
       }
     }
@@ -63,42 +61,36 @@ bool verifyResult(int* gold, int* result, int width, int height) {
   return 1;
 }
 
-double serialCreateFractal(int* output_serial, int width, int height,
-                           int maxIterations, float x0, float y0, float x1,
-                           float y1) {
+double serialCreateFractal(int* output_serial, int width, int height, int maxIterations, float x0,
+                           float y0, float x1, float y1) {
   double minSerial = 1e30;
   for (int i = 0; i < 5; ++i) {
     memset(output_serial, 0, width * height * sizeof(int));
     double startTime = CycleTimer::currentSeconds();
-    mandelbrotSerial(x0, y0, x1, y1, width, height, 0, height, maxIterations,
-                     output_serial);
+    mandelbrotSerial(x0, y0, x1, y1, width, height, 0, height, maxIterations, output_serial);
     double endTime = CycleTimer::currentSeconds();
     minSerial = std::min(minSerial, endTime - startTime);
   }
 
   printf("[mandelbrot serial]:\t\t[%.3f] ms\n", minSerial * 1000);
-  writePPMImage(output_serial, width, height, "mandelbrot-serial.ppm",
-                maxIterations);
+  writePPMImage(output_serial, width, height, "mandelbrot-serial.ppm", maxIterations);
 
   return minSerial;
 }
 
-double threadCreateFractal(int* output_thread, int numThreads, int width,
-                           int height, int maxIterations, float x0, float y0,
-                           float x1, float y1) {
+double threadCreateFractal(int* output_thread, int numThreads, int width, int height,
+                           int maxIterations, float x0, float y0, float x1, float y1) {
   double minThread = 1e30;
   for (int i = 0; i < 5; ++i) {
     memset(output_thread, 0, width * height * sizeof(int));
     double startTime = CycleTimer::currentSeconds();
-    mandelbrotThread(numThreads, x0, y0, x1, y1, width, height, maxIterations,
-                     output_thread);
+    mandelbrotThread(numThreads, x0, y0, x1, y1, width, height, maxIterations, output_thread);
     double endTime = CycleTimer::currentSeconds();
     minThread = std::min(minThread, endTime - startTime);
   }
 
   printf("[mandelbrot thread]:\t\t[%.3f] ms\n", minThread * 1000);
-  writePPMImage(output_thread, width, height, "mandelbrot-thread.ppm",
-                maxIterations);
+  writePPMImage(output_thread, width, height, "mandelbrot-thread.ppm", maxIterations);
 
   return minThread;
 }
@@ -120,10 +112,8 @@ std::expected<ResultMainCommon, int> mainCommon(int argc, char** argv) {
 
   // parse commandline options ////////////////////////////////////////////
   int opt;
-  static struct option long_options[] = {{"threads", 1, 0, 't'},
-                                         {"view", 1, 0, 'v'},
-                                         {"help", 0, 0, '?'},
-                                         {0, 0, 0, 0}};
+  static struct option long_options[] = {
+      {"threads", 1, 0, 't'}, {"view", 1, 0, 'v'}, {"help", 0, 0, '?'}, {0, 0, 0, 0}};
 
   while ((opt = getopt_long(argc, argv, "t:v:?", long_options, NULL)) != EOF) {
     switch (opt) {
@@ -168,21 +158,18 @@ std::expected<ResultMainCommon, int> mainCommon(int argc, char** argv) {
 }
 
 // Run an optimal configuration for this computer (AMD® Ryzen 7 6800h)
-std::pair<double, int> mainFindOptimalNumThreads(int* output_thread,
-                                                 int numThreads, int width,
-                                                 int height, int maxIterations,
-                                                 float x0, float y0, float x1,
-                                                 float y1) {
+std::pair<double, int> mainFindOptimalNumThreads(int* output_thread, int numThreads, int width,
+                                                 int height, int maxIterations, float x0, float y0,
+                                                 float x1, float y1) {
   std::pair<double, int> optimalConfig = std::make_pair(1e30, 1);
 
   for (numThreads = 2; numThreads <= 32; numThreads++) {
     double tempOptimal = optimalConfig.first;
 
     // NOTE: will re-write the output each time it runs
-    optimalConfig.first =
-        std::min(threadCreateFractal(output_thread, numThreads, FRACTAL_WIDTH,
-                                     FRACTAL_HEIGHT, MAX_ITERS, x0, y0, x1, y1),
-                 optimalConfig.first);
+    optimalConfig.first = std::min(threadCreateFractal(output_thread, numThreads, FRACTAL_WIDTH,
+                                                       FRACTAL_HEIGHT, MAX_ITERS, x0, y0, x1, y1),
+                                   optimalConfig.first);
 
     if (tempOptimal != optimalConfig.first) {
       optimalConfig.second = numThreads;

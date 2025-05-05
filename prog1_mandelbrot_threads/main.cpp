@@ -27,9 +27,9 @@ int main(int argc, char** argv) {
   //
   // Run the serial version
   //
-  double minSerial = serialCreateFractal(
-      res.value().output_serial, FRACTAL_WIDTH, FRACTAL_HEIGHT, MAX_ITERS,
-      res.value().x0, res.value().y0, res.value().x1, res.value().y1);
+  double minSerial =
+      serialCreateFractal(res.value().output_serial, FRACTAL_WIDTH, FRACTAL_HEIGHT, MAX_ITERS,
+                          res.value().x0, res.value().y0, res.value().x1, res.value().y1);
 
   //
   // Run the threaded version
@@ -43,12 +43,11 @@ int main(int argc, char** argv) {
 
   // 2. Finding optimal configuration
   auto [minThread, optimalNumThreads] = mainFindOptimalNumThreads(
-      res.value().output_thread, res.value().numThreads, FRACTAL_WIDTH,
-      FRACTAL_HEIGHT, MAX_ITERS, res.value().x0, res.value().y0, res.value().x1,
-      res.value().y1);
+      res.value().output_thread, res.value().numThreads, FRACTAL_WIDTH, FRACTAL_HEIGHT, MAX_ITERS,
+      res.value().x0, res.value().y0, res.value().x1, res.value().y1);
 
-  if (!verifyResult(res.value().output_serial, res.value().output_thread,
-                    FRACTAL_WIDTH, FRACTAL_HEIGHT)) {
+  if (!verifyResult(res.value().output_serial, res.value().output_thread, FRACTAL_WIDTH,
+                    FRACTAL_HEIGHT)) {
     printf("Error : Output from threads does not match serial output\n");
 
     return EXIT_FAILURE;

@@ -15,9 +15,8 @@ typedef struct {
   int numThreads;
 } WorkerArgs;
 
-extern void mandelbrotSerial(float x0, float y0, float x1, float y1, int width,
-                             int height, int startRow, int numRows,
-                             int maxIterations, int output[]);
+extern void mandelbrotSerial(float x0, float y0, float x1, float y1, int width, int height,
+                             int startRow, int numRows, int maxIterations, int output[]);
 
 //
 // workerThreadStart --
@@ -31,15 +30,14 @@ void workerThreadStart(WorkerArgs* const args) {
 
   // Divide the rows among the threads
   int baseRows = totalRows / numThreads;
-  int remainder = totalRows % numThreads; // Ensures all the rows are processed
+  int remainder = totalRows % numThreads;  // Ensures all the rows are processed
 
   int startRow = threadId * baseRows + std::min(threadId, remainder);
   int rows = baseRows + (threadId < remainder ? 1 : 0);
   int endRow = startRow + rows;
 
-  mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width,
-                   args->height, startRow, endRow - startRow,
-                   args->maxIterations, args->output);
+  mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width, args->height, startRow,
+                   endRow - startRow, args->maxIterations, args->output);
 }
 
 //
@@ -47,8 +45,8 @@ void workerThreadStart(WorkerArgs* const args) {
 //
 // Multi-threaded implementation of mandelbrot set image generation.
 // Threads of execution are created by spawning std::threads.
-void mandelbrotThread(int numThreads, float x0, float y0, float x1, float y1,
-                      int width, int height, int maxIterations, int output[]) {
+void mandelbrotThread(int numThreads, float x0, float y0, float x1, float y1, int width, int height,
+                      int maxIterations, int output[]) {
   static constexpr int MAX_THREADS = 32;
 
   if (numThreads > MAX_THREADS) {
